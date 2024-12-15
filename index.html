@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Propagate first-frame edits to subsequent frames using image-to-video models.">
+  <meta name="keywords" content="GenProp, Video Generation, Video Editing">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GenProp</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/adobe.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+  
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <!-- <div class="hero-body"> -->
+          <video id="caption" autoplay muted loop playsinline height="100%">
+            <source src="./static/videos/caption4.mov" type="video/mp4">
+          </video>
+          <!-- </div> -->
+          <!-- <h1 class="title is-1 publication-title">Generative Video Propagation</h1> -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://www.shaotengliu.com/">Shaoteng Liu</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://stevewongv.github.io/">Tianyu (Steve) Wang</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="http://juiwang.com/">Jui-Hsien Wang</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://qliu24.github.io/">Qing Liu</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://zzutk.github.io/">Zhifei Zhang</a><sup>2</sup>,
+            </span>
+            <br>
+            <span class="author-block">
+              <a href="https://joonyoung-cv.github.io/">Joon-Young Lee</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://yijunmaverick.github.io/">Yijun Li</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.cse.cuhk.edu.hk/~byu/">Bei Yu</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://sites.google.com/site/zhelin625/home">Zhe Lin</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://sites.google.com/view/sooyekim">Soo Ye Kim</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://jiaya.me/home">Jiaya Jia</a><sup>3,4</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>The Chinese University of Hong Kong,</span>
+            <span class="author-block"><sup>2</sup>Adobe Research</span>
+            <span class="author-block"><sup>3</sup>The Hong Kong University of Science and Technology</span>
+            <span class="author-block"><sup>4</sup>SmartMore</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2011.12948"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/google/nerfies"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Open-GenProp</span>
+                  </a>
+              </span>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-palace">
+          <video poster="" id="palace" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/palace.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-beach-dog">
+          <video poster="" id="beach-dog" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/beach-dog.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-flamingo">
+          <video poster="" id="flamingo" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/flamingo.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-swan">
+          <video poster="" id="swan" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/swan.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-fence">
+          <video poster="" id="fence" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/fence.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <h3 class="title is-4 has-text-centered">
+        <span style="color: black;">Object &</span>
+        <span style="color: #F9BD10;">Effect</span>
+        <span style="color: black;">Removal</span>
+      </h3>
+      <h3 class="title is-4"> </h3>
+    </div>
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-lemon">
+          <video poster="" id="lemon" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/lemon.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-blue-car">
+          <video poster="" id="blue-car" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/blue-car.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-hummingbird">
+          <video poster="" id="hummingbird" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/hummingbird.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-bee">
+          <video poster="" id="bee" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/bee.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <h3 class="title is-4 has-text-centered">
+        <span style="color: black;">Object</span>
+        <span style="color: #F9BD10;">Insertion</span>
+      </h3>
+      <h3 class="title is-4"> </h3>
+    </div>
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-boat">
+          <video poster="" id="boat" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/boat.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-goat">
+          <video poster="" id="goat" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/goat.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-stand">
+          <video poster="" id="stand" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/stand.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-vr">
+          <video poster="" id="vr" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/vr.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <h3 class="title is-4 has-text-centered">
+        <span style="color: black;">Object</span>
+        <span style="color: #F9BD10;">Replacement</span>
+      </h3>
+      <h3 class="title is-4"> </h3>
+    </div>
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-cat-burning">
+          <video poster="" id="cat-burning" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/cat-burning.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-fishing">
+          <video poster="" id="fishing" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/fishing.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-car-burning-snow">
+          <video poster="" id="car-burning-snow" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/car-burning-snow.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-meta-man-fire">
+          <video poster="" id="meta-man-fire" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/meta-man-fire.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <h3 class="title is-4 has-text-centered">
+        <span style="color: #F9BD10;">Effect</span>
+        <span style="color: black;">Editing</span>
+      </h3>
+      <h3 class="title is-4"> </h3>
+    </div>
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-vr-universe">
+          <video poster="" id="vr-universe" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/vr-universe.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-vr-cow">
+          <video poster="" id="vr-cow" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/vr-cow.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-vr-cowwater">
+          <video poster="" id="vr-cowwater" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/vr-cowwater.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-vr-cowwater">
+          <video poster="" id="vr-cowwater" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/vr-cowwater.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-vr-aurora">
+          <video poster="" id="vr-aurora" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/vr-aurora.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-car-ice">
+          <video poster="" id="car-ice" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/car-ice.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <h3 class="title is-4 has-text-centered">
+        <span style="color: #F9BD10;">Background</span>
+        <span style="color: black;">Replacement</span>
+      </h3>
+      <h3 class="title is-4"> </h3>
+    </div>
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-mountain">
+          <video poster="" id="mountain" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/mountain.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-fpv">
+          <video poster="" id="fpv" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/fpv.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-sky">
+          <video poster="" id="sky" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/sky.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-rain">
+          <video poster="" id="rain" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/rain.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-cat-snow">
+          <video poster="" id="cat-snow" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/cat-snow.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <h3 class="title is-4 has-text-centered">
+        <span style="color: #F9BD10;">Emergent</span>
+        <span style="color: black;">Ability: Outpainting</span>
+      </h3>
+      <h3 class="title is-4"> </h3>
+    </div>
+  </div>
+</section>
+
+<!-- <section class="hero is-small">
+  <div class="hero-body">
+    <div class="container">
+
+    </div>
+  </div>
+</section> -->
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Large-scale video generation models have the inherent ability to realistically model natural scenes.
+            In this paper, we demonstrate that through a careful design of a \textbf{generative video propagation framework},
+            various video tasks can be addressed in a unified way by leveraging the generative power of such models.
+          </p>
+          <p>
+            Specifically, our framework, GenProp, encodes the original video with a selective content encoder and propagates the changes made to the first frame using an image-to-video generation model.
+            We propose a data generation scheme to cover multiple video tasks based on instance-level video segmentation datasets.
+            Our model is trained by incorporating a mask prediction decoder head and optimizing a region-aware loss to aid the encoder to preserve the original content while the generation model propagates the modified region.
+          </p>
+          <p>
+            This novel design opens up new possibilities: In editing scenarios, GenProp allows substantial changes to an object’s shape; for insertion, the inserted objects can exhibit independent motion; for removal, GenProp effectively removes effects like shadows and reflections from the whole video; for tracking,
+            GenProp is capable of tracking objects and their associated effects together.
+            Experiment results demonstrate the leading performance of our model in various video tasks,
+            and we further provide in-depth analyses of the proposed framework.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+
+    <div class="hero-body has-text-justified">
+      <h2 class="title is-3 has-text-centered">Method</h2>
+      <img class="center-img" src="./static/images/framework-detail_v5.png" width="100%" />
+      <h2 class="subtitle">
+        Training Framework of GenProp. Our framework integrates a Selective Content Encoder and a Mask Prediction Decoder on top of the I2V generation model, enforcing the model to propagate the edited region while preserving the content in the original video for all other regions.
+      </h2>
+    </div>
+
+    <div class="hero-body">
+      <h2 class="title is-3 has-text-centered">Tracking Comparison</h2>
+      <video id="tracking" autoplay muted loop playsinline height="100%">
+        <source src="./static/videos/tracking.mp4"
+                type="video/mp4">
+      </video>
+      <h2 class="subtitle">
+        GenProp is further able to perform instance tracking of objects and their effects when solid color fills are given as the first frame.
+      </h2>
+    </div>
+
+    <div class="hero-body">
+      <h2 class="title is-3 has-text-centered">Multiple Edits</h2>
+      <video id="teaser" autoplay muted loop playsinline height="100%">
+        <source src="./static/videos/christmas-dog.mp4"
+                type="video/mp4">
+      </video>
+      <h2 class="subtitle has-text-centered">
+        Multiple edits (outpainting, insertion, removal) at a single inference run.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+    <!-- Concurrent Work. -->
+    <!-- <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Related Links</h2>
+
+        <div class="content has-text-justified">
+          <p>
+            There's a lot of excellent work that was introduced around the same time as ours.
+          </p>
+          <p>
+            <a href="https://arxiv.org/abs/2104.09125">Progressive Encoding for Neural Optimization</a> introduces an idea similar to our windowed position encoding for coarse-to-fine optimization.
+          </p>
+          <p>
+            <a href="https://www.albertpumarola.com/research/D-NeRF/index.html">D-NeRF</a> and <a href="https://gvv.mpi-inf.mpg.de/projects/nonrigid_nerf/">NR-NeRF</a>
+            both use deformation fields to model non-rigid scenes.
+          </p>
+          <p>
+            Some works model videos with a NeRF by directly modulating the density, such as <a href="https://video-nerf.github.io/">Video-NeRF</a>, <a href="https://www.cs.cornell.edu/~zl548/NSFF/">NSFF</a>, and <a href="https://neural-3d-video.github.io/">DyNeRF</a>
+          </p>
+          <p>
+            There are probably many more by the time you are reading this. Check out <a href="https://dellaert.github.io/NeRF/">Frank Dellart's survey on recent NeRF papers</a>, and <a href="https://github.com/yenchenlin/awesome-NeRF">Yen-Chen Lin's curated list of NeRF papers</a>.
+          </p>
+        </div>
+      </div>
+    </div> -->
+    <!--/ Concurrent Work. -->
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{xxxgenprop,
+  author    = {Liu, Shaoteng and... Tianyu Wang, Jui-Hsien Wang, Qing Liu, Zhifei Zhang, Joon-Young Lee, Yijun Li, Bei Yu, Zhe Lin, Soo Ye Kim, Jiaya Jia},
+  title     = {Generative Video Propagation},
+  journal   = {arXiv preprint arXiv:xxxx},
+  year      = {2024},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <!-- <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/videos/nerfies_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div> -->
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is based on <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>, licensed under a 
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
